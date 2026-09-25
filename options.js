@@ -137,7 +137,7 @@ document.querySelector('#test').addEventListener('click', () => {
   try {
     const lines = matchingLines(compileRules(draftRules()), urlInput.value);
     for (const line of lines) filters.children[line - 1].classList.add('matching-filter');
-    show(testStatus, lines.length ? `Matching filters: ${lines.join(', ')}.` : 'No matching filters.');
+    show(testStatus, lines.length ? `Matched: ${lines.map(line => `Filter ${line}`).join(', ')}.` : 'No matching filters.');
   } catch (error) {
     showRuleError(testStatus, error);
   }

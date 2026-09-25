@@ -188,7 +188,7 @@ try {
     assert.deepEqual(await highlightedFilters(), []);
     assert.deepEqual(await evaluate(optionsSession, `chrome.storage.local.get('settings').then(x => x.settings)`), saved);
     await testUrl(url);
-    assert.equal(await evaluate(optionsSession, `document.querySelector('#test-status').textContent`), 'Matching filters: 2.');
+    assert.equal(await evaluate(optionsSession, `document.querySelector('#test-status').textContent`), 'Matched: Filter 2.');
     assert.deepEqual(await highlightedFilters(), [2]);
     const screenshot = await call('Page.captureScreenshot', { format: 'png' }, optionsSession);
     writeFileSync(join(evidence, 'options-escaped-url.png'), Buffer.from(screenshot.data, 'base64'));
@@ -200,13 +200,13 @@ try {
     await testUrl(url.replace('/a.b', '/aXb'));
     assert.equal(await evaluate(optionsSession, `document.querySelector('#test-status').textContent`), 'No matching filters.');
     await testUrl('prefix' + url + 'suffix');
-    assert.equal(await evaluate(optionsSession, `document.querySelector('#test-status').textContent`), 'Matching filters: 2.');
+    assert.equal(await evaluate(optionsSession, `document.querySelector('#test-status').textContent`), 'Matched: Filter 2.');
   });
   await checkpoint('tester highlights matching draft fields and keeps numbered result', async () => {
     await setDraft('^' + base.replaceAll('.', '\\.') + '/test\\?q=1#done$\n\n(?i:test)');
     await testUrl(base + '/test?q=1#done');
     const status = await evaluate(optionsSession, `document.querySelector('#test-status').textContent`);
-    assert.equal(status, 'Matching filters: 1, 3.');
+    assert.equal(status, 'Matched: Filter 1, Filter 3.');
     assert.deepEqual(await highlightedFilters(), [1, 3]);
     const colors = await evaluate(optionsSession, `[...document.querySelectorAll('.filter-input')].map(input => getComputedStyle(input).backgroundColor)`);
     assert.equal(colors[0], colors[2]);
