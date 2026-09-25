@@ -15,7 +15,7 @@ The extension needs `webNavigation`, `tabs`, and `storage`. It has no host permi
 
 Run `npm run package` with Node.js and the `zip` command installed on macOS or Linux. It creates `dist/tab-closer-<manifest version>.zip` with the extension files and `LICENSE` at the ZIP root. The script reads the version from `manifest.json` and replaces an existing archive for that version. Increase the manifest version before packaging an update for either store.
 
-Pushes to `main` and manual runs of the Package extension GitHub Actions workflow run the unit tests, build the same ZIP, and attach it directly to the workflow run as a downloadable artifact. The ZIP is a store upload package, not a browser installer. The workflow does not submit or publish it.
+Pushes to `main` and manual runs of the Package extension GitHub Actions workflow run the unit tests, build the same ZIP, and attach it directly to the workflow run as a downloadable artifact. After those steps succeed, the workflow also publishes a GitHub Release with the ZIP attached. Its tag and title use `build-<UTC timestamp>-<run number>.<attempt>`, so a rerun gets a separate release. The ZIP is a store upload package, not a browser installer. The workflow does not submit it to either browser store.
 
 For a link-only listing, choose [Unlisted in the Chrome Web Store](https://developer.chrome.com/docs/webstore/cws-dashboard-distribution) or [Hidden in Microsoft Edge Add-ons](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension). Each store needs its own developer account, listing details and images, privacy and permission disclosures, and review. Chrome's [preparation guide](https://developer.chrome.com/docs/webstore/prepare) explains its ZIP and manifest requirements.
 
