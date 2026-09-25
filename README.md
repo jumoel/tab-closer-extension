@@ -1,8 +1,8 @@
 # Tab Closer
 
-Tab Closer closes a tab when its completed top-level document URL matches a saved JavaScript regular expression. It runs as a local Manifest V3 extension in Chromium or Microsoft Edge. It does not inspect sign-in state or make network requests of its own.
+Tab Closer closes a tab when its completed top-level document URL matches a saved JavaScript regular expression. It runs as a Manifest V3 extension in Chromium or Microsoft Edge. It does not inspect sign-in state or make network requests of its own.
 
-## Install
+## Local development
 
 1. Open `chrome://extensions/` in Chromium or `edge://extensions/` in Edge.
 2. Enable Developer mode.
@@ -10,6 +10,14 @@ Tab Closer closes a tab when its completed top-level document URL matches a save
 4. Click the Tab Closer toolbar action to open the full page settings. You can also open the extension's options from the extension manager.
 
 The extension needs `webNavigation`, `tabs`, and `storage`. It has no host permissions or content scripts. Settings live in the browser profile's local extension storage. Browser restarts preserve them; uninstalling the extension clears them.
+
+## Store package
+
+Run `npm run package` with Node.js and the `zip` command installed on macOS or Linux. It creates `dist/tab-closer-<manifest version>.zip` with the extension files and `LICENSE` at the ZIP root. The script reads the version from `manifest.json` and replaces an existing archive for that version. Increase the manifest version before packaging an update for either store.
+
+Pushes to `main` and manual runs of the Package extension GitHub Actions workflow run the unit tests, build the same ZIP, and attach it directly to the workflow run as a downloadable artifact. The ZIP is a store upload package, not a browser installer. The workflow does not submit or publish it.
+
+For a link-only listing, choose [Unlisted in the Chrome Web Store](https://developer.chrome.com/docs/webstore/cws-dashboard-distribution) or [Hidden in Microsoft Edge Add-ons](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension). Each store needs its own developer account, listing details and images, privacy and permission disclosures, and review. Chrome's [preparation guide](https://developer.chrome.com/docs/webstore/prepare) explains its ZIP and manifest requirements.
 
 ## Rules and tester
 
