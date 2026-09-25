@@ -1,0 +1,27 @@
+:root { color-scheme: light dark; font: 16px/1.5 system-ui, sans-serif; }
+body { margin: 0; }
+main { max-width: 52rem; margin: 2rem auto; padding: 0 1rem 3rem; }
+h1 { margin-bottom: .5rem; }
+label { display: block; font-weight: 600; margin: 1rem 0 .35rem; }
+fieldset { min-width: 0; margin: 1.5rem 0 0; padding: 0; border: 0; }
+legend { padding: 0; font-weight: 600; }
+input { box-sizing: border-box; width: 100%; padding: .65rem; font: inherit; }
+input, code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.filter-input { border: 1px solid #767676; }
+.filter-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: .35rem .75rem; margin-top: 1rem; }
+.matching-filter .filter-input { background: #f1f8f2; }
+.filter-row label { grid-column: 1 / -1; margin: 0; }
+.filter-row button { margin: 0; }
+@media (max-width: 38rem) {
+  .filter-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .filter-row .filter-input { grid-column: 1 / -1; }
+}
+button { font: inherit; padding: .45rem .9rem; margin-top: .75rem; cursor: pointer; }
+.help { margin-top: .35rem; }
+#save-status, #test-status { min-height: 1.5em; }
+.error { color: #b00020; }
+@media (prefers-color-scheme: dark) {
+  .error { color: #ff8b9b; }
+  .filter-input { border-color: #858585; }
+  .matching-filter .filter-input { background: #28382d; }
+}

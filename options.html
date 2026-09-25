@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tab Closer settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>Tab Closer</h1>
+    <p>Enter one JavaScript regex per filter. Matches are case-sensitive by default. Inline modifiers supported by your browser can change that. Filters match the full URL supplied by the browser, including query and fragment. For example: <code>^https://www\.reddit\.com/</code></p>
+    <form id="settings-form">
+      <fieldset>
+        <legend>URL filters</legend>
+        <div id="filters"></div>
+        <button type="button" id="add-filter">Add filter</button>
+        <p id="rules-help" class="help">Blank filters are ignored. Spaces in nonblank filters are part of the regex. Paste a URL into a filter, then select Add escape characters to match that text literally. Saving filters never scans open tabs.</p>
+      </fieldset>
+      <button type="submit" id="save">Save filters</button>
+      <p id="save-status" role="status" aria-live="polite"></p>
+    </form>
+    <section aria-labelledby="tester-heading">
+      <h2 id="tester-heading">Test a URL</h2>
+      <p>The tester uses the current draft. It does not visit the URL or close a tab.</p>
+      <label for="test-url">Exact URL string</label>
+      <input id="test-url" type="text" spellcheck="false" autocomplete="off">
+      <button type="button" id="test">Test draft</button>
+      <p id="test-status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

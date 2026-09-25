@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Closer",
+  "version": "1.0.0",
+  "description": "Close completed tabs whose URLs match saved regex rules.",
+  "minimum_chrome_version": "106",
+  "permissions": ["webNavigation", "tabs", "storage"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "action": { "default_title": "Tab Closer settings" }
+}
