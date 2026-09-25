@@ -1,59 +1,42 @@
 # Tab Closer
 
-Tab Closer closes a tab when its completed top-level document URL matches a saved JavaScript regular expression. It runs as a Manifest V3 extension in Chromium or Microsoft Edge. It does not inspect sign-in state or make network requests of its own.
+Tab Closer is a browser extension for Chromium and Microsoft Edge. It closes a tab when a page finishes loading at a URL you've chosen. It is useful for leftover tabs after signing in through command-line tools, or any other page you no longer need. It closes nothing until you save a filter.
 
-## Local development
+## Install
 
-1. Open `chrome://extensions/` in Chromium or `edge://extensions/` in Edge.
-2. Enable Developer mode.
-3. Choose **Load unpacked** and select this repository directory.
-4. Click the Tab Closer toolbar action to open the full page settings. You can also open the extension's options from the extension manager.
+1. Open the [latest release](https://github.com/jumoel/tab-closer-extension/releases/latest) and download `tab-closer-<version>.zip`.
+2. Extract the ZIP into a folder you will keep. The folder should contain `manifest.json`.
+3. Open `chrome://extensions/` in Chromium or `edge://extensions/` in Edge, then enable **Developer mode**.
+4. Click **Load unpacked** and select the extracted folder.
+5. Open the browser's Extensions menu and select Tab Closer to open its settings. If you pin it, you can also click its toolbar icon.
 
-The extension needs `webNavigation`, `tabs`, and `storage`. It has no host permissions or content scripts. Settings live in the browser profile's local extension storage. Browser restarts preserve them; uninstalling the extension clears them.
+The ZIP itself is not a browser installer. GitHub downloads do not update automatically. To update, extract a newer ZIP into the same folder, replace the old files, then reload the extension from the extensions page.
 
-## Store package
+## Choose what to close
 
-Run `npm run package` with Node.js and the `zip` command installed on macOS or Linux. It creates `dist/tab-closer-<manifest version>.zip` with the extension files and `LICENSE` at the ZIP root. The script reads the version from `manifest.json` and replaces an existing archive for that version. Increase the manifest version before packaging an update for either store.
+Add one URL filter per field. Filters are JavaScript regular expressions, and matching is case-sensitive by default. Use **Add filter** for another field. Blank fields are ignored.
 
-Pushes to `main` and manual runs of the Package extension GitHub Actions workflow run the unit tests, build the same ZIP, and attach it directly to the workflow run as a downloadable artifact. After those steps succeed, the workflow also publishes a GitHub Release with the ZIP attached. Its tag and title use `build-<UTC timestamp>-<run number>.<attempt>`, so a rerun gets a separate release. The ZIP is a store upload package, not a browser installer. The workflow does not submit it to either browser store.
+For a literal URL, paste it into a filter and click **Add escape characters** once. This escapes regex punctuation such as `.` and `?`, so those characters match as written. The button does not add `^` or `$`. Clicking it again also escapes the backslashes it added the first time.
 
-For a link-only listing, choose [Unlisted in the Chrome Web Store](https://developer.chrome.com/docs/webstore/cws-dashboard-distribution) or [Hidden in Microsoft Edge Add-ons](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension). Each store needs its own developer account, listing details and images, privacy and permission disclosures, and review. Chrome's [preparation guide](https://developer.chrome.com/docs/webstore/prepare) explains its ZIP and manifest requirements.
-
-## Rules and tester
-
-Enter one JavaScript regex source in each filter field, with no `/` delimiters or flags field. Use **Add filter** to create another field and **Remove** to delete one. Paste a URL into a filter and select **Add escape characters** to escape regex syntax characters in that field. Each click escapes the current text, including any backslashes already present. Blank and whitespace-only filters are ignored. Other filters are preserved exactly, including spaces. A match anywhere in the browser-provided URL counts, so use `^` and `$` to anchor it. The URL includes its query and fragment. Matching is case-sensitive by default; inline modifiers work if the installed browser supports them.
+Paste a URL into **Test a URL** and click **Test draft** before saving. The tester uses your unsaved filters, highlights matches, and names them in the result. It does not visit the URL or close a tab. When the result looks right, click **Save filters**. Only saved filters affect later page loads.
 
 For example:
 
 ```text
-^https://www\.reddit\.com/
+^https://login\.example\.com/done$
+^https://docs\.example\.com/archive/
 ```
 
-The tester evaluates the editable draft against the exact string in its URL field. It lists every matching filter number. It does not navigate or close tabs. **Save filters** validates each nonblank field, then writes the whole draft as one versioned record. A failed validation or storage write leaves the previously saved filters in place. Empty saved filters close nothing. Existing newline-separated saved rules load into individual fields.
+The first matches only that complete URL. The second matches pages under `/archive/`, such as `/archive/report`. `^` means the start of the URL, and `$` means the end. Without them, a filter can match anywhere in the URL. The URL includes its query string and `#` fragment.
 
-Saving, starting the extension, or restarting the browser does not scan open tabs. A later eligible document completion can close a matching tab, including a selected, background, pinned, or last tab in a window. Closing the last tab can close its window. The extension does not delay closing once its checks finish.
+Tab Closer checks a page when it finishes loading. Saving a filter does not scan tabs already open. Changing the URL without loading a new page does not trigger a close. A matching tab may be active or pinned. Closing the last tab can close its window.
 
-## Event and execution limits
+For sign-in flows, choose a URL reached only on the final completion page. Tab Closer matches URLs; a page load alone does not tell it whether authentication succeeded.
 
-The extension listens to `webNavigation.onCompleted` for active top-level documents. It checks that the same document and URL remain current before requesting removal. Iframe completion and same-document History API or fragment changes do not start a close. A redirect destination or a loaded 404 document can match. An eligible completion after cache restoration can match. Inactive prerendered documents are ignored until an eligible active completion occurs.
+Filters stay in your browser profile. The extension does not upload visited URLs or keep a tab history.
 
-Native JavaScript regex matching is synchronous and has no general time bound. A syntactically valid pattern can backtrack for a long time and stall the service worker or settings tester. Syntax validation does not prove a rule is cheap to evaluate. Do not use patterns whose cost you do not trust. A stalled match also delays cancellation handlers. Navigation and settings changes are not atomic with tab removal, and a stopped service worker can miss an event. Closure is not guaranteed for every eligible load.
+## Development
 
-Browser-internal, `blob:`, extension, and other URL schemes follow the completion events the browser actually exposes. They are not guaranteed to emit them. A broad rule can match an extension manager page that does emit completion; the full page options document remains available as a recovery route.
+Run `npm test` for unit checks and `npm run package` to build a ZIP in `dist/`. The GitHub Actions workflow packages successful builds from `main` into timestamped releases without submitting them to browser stores.
 
-The extension stores no visited URLs, tester input, or tab history. Error reports omit URLs and raw browser API error messages.
-
-## Run checks
-
-```sh
-npm test
-npm run test:browser
-npm run test:edge
-npm run test:lifecycle
-```
-
-`npm test` uses API doubles for rule behavior and cancellation races. The browser commands need local loopback binding and launch isolated, temporary browser profiles. They never use the normal browser profile. The browser harness uses the macOS Chromium and Edge application paths shown in `tests/browser.mjs` and `tests/lifecycle.mjs`. Each browser run prints an evidence directory containing `results.json`, browser logs, and an options screenshot where applicable; it removes its temporary profile at the end.
-
-On 2026-09-25, the commands above passed with Node `v24.12.0`, Chromium `152.0.7977.82`, and Edge `153.0.4234.48` on this machine. The Chromium run observed real removal after a delayed response completed; nonmatches staying open; selected, background, pinned, and sole-window-tab removal; redirect destination and 404 closure; iframe and post-completion History API/fragment changes staying open; no scan on save followed by closure on reload; back/forward cache restoration with the same document ID and a new completion; a failed navigation staying open; and full page settings remaining usable under a broad rule. With a broad rule, an extension options page and a blob page stayed open while the browser extension manager closed. Chromium and Edge both checked adding and removing fields, filter numbering, invalid-save preservation, an injected storage-write rejection, draft tester results, and loading and saving an older multiline record without changing its rules. The Edge smoke run also observed basic completion closure and nonmatches. A separate Chromium run observed saved rules after browser restart, closure after restart, worker target disappearance after idling, and closure on the next completion.
-
-The tests did not exercise an actual toolbar click in the browser chrome, a genuine storage write failure, prerender activation, or a forced worker stop during pending work. The toolbar action listener and cancellation paths have API-double coverage. Browser coverage is limited to the versions and cases above.
+`npm run test:browser`, `npm run test:edge`, and `npm run test:lifecycle` run browser checks on macOS with Chromium and Edge installed in `/Applications`.
